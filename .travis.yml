@@ -4,7 +4,7 @@ services:
 language: python
 python: 2.7
 before_install:
-  - wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.7.4_x86_64.deb
+  - wget --no-check-certificate https://dl.bintray.com/mitchellh/vagrant/vagrant_1.7.4_x86_64.deb
   - sudo dpkg -i vagrant_1.7.4_x86_64.deb
   - for image in debian_wheezy debian_jessie ubuntu_trusty centos_7 fedora_21; do docker pull philpep/testinfra:$image; done
   - vagrant up --provider=docker
