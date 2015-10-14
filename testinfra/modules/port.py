@@ -34,22 +34,21 @@ class Port(Module):
         instance._get_connection_information()
         return instance
 
-    def _netstat_command(self):
+    def _run_netstat(self):
         raise NotImplementedError
 
     def _get_connection_information(self):
         """Helper method to search for data about the expected <address>:<port> connection"""
-        results = self.run_test(self._netstat_command())
-        expected_address = "%s:%s" % (self.address, self.port)
-        lines = results.stdout.split("\n")
+        search_address = "%s:%s" % (self.address, self.port)
+        lines = self._run_netstat()
         # Iterate all lines but the first which is the header
-        for line in lines[1:]:
+        for line in lines:
             # Proto Recv-Q Send-Q  Local Address          Foreign Address        (state)
             proto, _, _, local_address, foreign_address, state = re.split("\s+", line.strip())
             if local_address.startswith("*:"):
                 local_address = "0.0.0.0" + local_address[1:]
 
-            if local_address == expected_address:
+            if local_address == search_address:
                 address, port = local_address.split(":")
                 self.address = address
                 self.port = port
@@ -84,10 +83,16 @@ class Port(Module):
 
 
 class GNUPort(Port):
-    def _netstat_command(self):
-        return "netstat -tunl"
+    def _run_netstat(self):
+        results = self.run_test("netstat -tunl")
+        lines = results.stdout.split("\n")
+        # Skip the first line which is the header
+        return lines[1:]
 
 
 class BSDPort(Port):
-    def _netstat_command(self):
-        return "netstat -an -f inet"
+    def _run_netstat(self):
+        results = self.run_test("netstat -an -f inet")
+        lines = results.stdout.split("\n")
+        # Skip the first two lines which are part of the header
+        return lines[2:]
