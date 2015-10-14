@@ -41,7 +41,7 @@ class Port(Module):
         """Helper method to search for data about the expected <address>:<port> connection"""
         results = self.run_test(self._netstat_command())
         expected_address = "%s:%s" % (self.address, self.port)
-        for line in results:
+        for line in results.stdout:
             # Proto Recv-Q Send-Q  Local Address          Foreign Address        (state)
             proto, _, _, local_address, foreign_address, state = re.split("\s+", results.trim("\n"))
             if local_address.startswith("*:"):
