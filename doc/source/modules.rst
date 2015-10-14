@@ -134,6 +134,10 @@ Port
 
     .. attributes:: is_listening
 
+    .. attributes:: is_tcp
+
+    .. attributes:: is_udp
+
     .. attributes:: port
 
     .. attributes:: protocol
