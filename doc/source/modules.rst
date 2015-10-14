@@ -127,21 +127,8 @@ Port
 ~~~~~~
 
 .. autoclass:: testinfra.modules.Port(address, port)
-
-    Test active connections
-
-    .. attributes:: address
-
-    .. attributes:: is_listening
-
-    .. attributes:: is_tcp
-
-    .. attributes:: is_udp
-
-    .. attributes:: port
-
-    .. attributes:: protocol
-
-    .. attributes:: state
+   :members:
+   :undoc-members:
+   :exclude-members: get_module
 
 .. _pytest fixtures: https://pytest.org/latest/fixture.html
