@@ -123,4 +123,21 @@ Sysctl
 .. autoclass:: testinfra.modules.Sysctl(name)
    :members:
 
+Port
+~~~~~~
+
+.. autoclass:: testinfra.modules.Port(address, port)
+
+    Test active connections
+
+    .. attributes:: address
+
+    .. attributes:: is_listening
+
+    .. attributes:: port
+
+    .. attributes:: protocol
+
+    .. attributes:: state
+
 .. _pytest fixtures: https://pytest.org/latest/fixture.html
