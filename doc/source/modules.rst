@@ -123,8 +123,9 @@ Sysctl
 .. autoclass:: testinfra.modules.Sysctl(name)
    :members:
 
+
 Port
-~~~~~~
+~~~~
 
 .. autoclass:: testinfra.modules.Port(address, port)
    :members:

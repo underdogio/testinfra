@@ -162,22 +162,31 @@ class Port(Module):
 
 class GNUPort(Port):
     def _netstat_command(self):
-        return "netstat -tunl"
+        # -t (show tcp connections)
+        # -u (show udp connections)
+        # -n (show numeric addresses)
+        # -l (show listening connections)
+        return "netstat -tun"
 
     def _parse_address_port(self, local_address):
+        # Examples: `127.0.0.1:22`, `*:22`, `:::22`
         if local_address.startswith("*:"):
             local_address = "0.0.0.0" + local_address[1:]
+        elif local_address.startswith(":::"):
+            local_address = "0.0.0.0" + local_address[2:]
         address, _, port = local_address.partition(":")
-        if port.startswith("::"):
-            port = port[2:]
         return address, int(port)
 
 
 class BSDPort(Port):
     def _netstat_command(self):
+        # -a (show the state of all sockets)
+        # -n (show network addresses as numbers)
+        # -f inet (show connections for the 'inet' address family)
         return "netstat -an -f inet"
 
     def _parse_address_port(self, local_address):
+        # Examples: `127.0.0.1.22`, `*.22`
         if local_address.startswith("."):
             local_address = "0.0.0.0" + local_address[1:]
 
