@@ -166,7 +166,7 @@ class GNUPort(Port):
         # -u (show udp connections)
         # -n (show numeric addresses)
         # -l (show listening connections)
-        return "netstat -tun"
+        return "netstat -tunl"
 
     def _parse_address_port(self, local_address):
         # Examples: `127.0.0.1:22`, `*:22`, `:::22`
