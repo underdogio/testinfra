@@ -23,10 +23,10 @@ class Port(Module):
     """Test various active port attributes"""
 
     def __init__(self, _backend, address, port):
-        self.address = address
-        self.port = port
-        self.protocol = None
-        self.state = None
+        self._address = address
+        self._port = port
+        self._protocol = None
+        self._state = None
         super(Port, self).__init__(_backend)
 
     def __call__(self, address, port):
@@ -56,11 +56,21 @@ class Port(Module):
             address, port = self._parse_address_port(local_address)
 
             if address == self.address and port == self.port:
-                self.address = address
-                self.port = port
-                self.protocol = proto
-                self.state = state
+                self._address = address
+                self._port = port
+                self._protocol = proto
+                self._state = state
                 break
+
+    @property
+    def address(self):
+        """Get the address of the connection
+
+        >>> Port("0.0.0.0", 22).address
+        "0.0.0.0"
+
+        """
+        return self._address
 
     @property
     def is_tcp(self):
@@ -97,6 +107,44 @@ class Port(Module):
 
         """
         return self.state == 'LISTEN'
+
+    @property
+    def port(self):
+        """Get the port of the connection
+
+        >>> Port("0.0.0.0", 22).port
+        22
+
+        """
+        return self._port
+
+    @property
+    def protocol(self):
+        """Get the protocol being used by the connection
+
+        >>> Port("0.0.0.0", 22).protocol
+        "tcp"
+        >>> # Could also be tcp4/tcp6 depending on your system
+        >>> Port("0.0.0.0", 22).protocol
+        tcp4
+
+        It is recommended to use :py:attr:`.is_tcp` or :py:attr:`.is_udp`
+
+        """
+
+        return self._protocol
+
+    @property
+    def state(self):
+        """Get the state of the connection
+
+        >>> Port("0.0.0.0", 22).state
+        "LISTEN"
+
+        It is recommended to use :py:attr:`.is_listening`
+
+        """
+        return self._state
 
     def __repr__(self):
         return "<port %s:%s>" % (self.address, self.port)
