@@ -120,7 +120,10 @@ class GNUPort(Port):
         if local_address.startswith("*:"):
             local_address = "0.0.0.0" + local_address[1:]
         address, _, port = local_address.partition(":")
+        if port.startswith("::"):
+            port = port[2:]
         return address, int(port)
+
 
 class BSDPort(Port):
     def _netstat_command(self):
