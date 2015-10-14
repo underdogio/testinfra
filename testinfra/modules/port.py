@@ -37,26 +37,54 @@ class Port(Module):
     def _netstat_command(self):
         raise NotImplementedError
 
+    def _parse_address_port(self, local_address):
+        raise NotImplementedError
+
     def _get_connection_information(self):
         """Helper method to search for data about the expected <address>:<port> connection"""
-        search_address = "%s:%s" % (self.address, self.port)
         results = self.run_test(self._netstat_command())
         lines = results.stdout.split("\n")
 
-        # Skip the first two lines which are part of the header
-        for line in lines[2:]:
-            # Proto Recv-Q Send-Q  Local Address          Foreign Address        (state)
-            proto, _, _, local_address, foreign_address, state = re.split("\s+", line.strip())
-            if local_address.startswith("*:"):
-                local_address = "0.0.0.0" + local_address[1:]
+        for line in lines:
+            parts = re.split("\s+", line.strip())
+            # Skip any lines which do not have enough parts (e.g. header or footer lines)
+            if len(parts) != 6:
+                continue
 
-            if local_address == search_address:
-                address, port = local_address.split(":")
+            # Proto Recv-Q Send-Q  Local Address          Foreign Address        (state)
+            proto, _, _, local_address, foreign_address, state = parts
+            address, port = self._parse_address_port(local_address)
+
+            if address == self.address and port == self.port:
                 self.address = address
                 self.port = port
                 self.protocol = proto
                 self.state = state
                 break
+
+    @property
+    def is_tcp(self):
+        """Test if port is using tcp
+
+        >>> Port("0.0.0.0", 22).is_tcp
+        True
+        >>> Port("127.0.0.1", 53).is_tcp
+        False
+
+        """
+        return self.protocol and self.protocol.startswith("tcp")
+
+    @property
+    def is_udp(self):
+        """Test if port is using udp
+
+        >>> Port("0.0.0.0", 53).is_udp
+        True
+        >>> Port("0.0.0.0", 22).is_tcp
+        False
+
+        """
+        return self.protocol and self.protocol.startswith("tcp")
 
     @property
     def is_listening(self):
@@ -78,7 +106,7 @@ class Port(Module):
         SystemInfo = _backend.get_module("SystemInfo")
         if SystemInfo.type == "linux":
             return GNUPort(_backend, None, None)
-        elif SystemInfo.type.endswith("bsd"):
+        elif SystemInfo.type.endswith("bsd") or SystemInfo.type == "darwin":
             return BSDPort(_backend, None, None)
         else:
             raise NotImplementedError
@@ -88,7 +116,19 @@ class GNUPort(Port):
     def _netstat_command(self):
         return "netstat -tunl"
 
+    def _parse_address_port(self, local_address):
+        if local_address.startswith("*:"):
+            local_address = "0.0.0.0" + local_address[1:]
+        address, _, port = local_address.partition(":")
+        return address, int(port)
 
 class BSDPort(Port):
     def _netstat_command(self):
-        return "netstat -af -f inet"
+        return "netstat -an -f inet"
+
+    def _parse_address_port(self, local_address):
+        if local_address.startswith("."):
+            local_address = "0.0.0.0" + local_address[1:]
+
+        address, _, port = local_address.rpartition(".")
+        return address, int(port)
