@@ -41,17 +41,19 @@ class Port(Module):
         raise NotImplementedError
 
     def _get_connection_information(self):
-        """Helper method to search for data about the expected <address>:<port> connection"""
+        """Search for data about the expected <address>:<port> connection"""
         results = self.run_test(self._netstat_command())
         lines = results.stdout.split("\n")
 
         for line in lines:
             parts = re.split("\s+", line.strip())
-            # Skip any lines which do not have enough parts (e.g. header or footer lines)
+            # Skip any lines which do not have enough parts
+            #   (e.g. header or footer lines)
             if len(parts) != 6:
                 continue
 
-            # Proto Recv-Q Send-Q  Local Address          Foreign Address        (state)
+            # Proto Recv-Q Send-Q  Local Address          Foreign Address        (state)  # noqa
+            # tcp4       0      0  127.0.0.1.5556         *.*                    LISTEN   # noqa
             proto, _, _, local_address, foreign_address, state = parts
             address, port = self._parse_address_port(local_address)
 
@@ -106,7 +108,7 @@ class Port(Module):
         False
 
         """
-        return self.state == 'LISTEN'
+        return self.state == "LISTEN"
 
     @property
     def port(self):
@@ -126,7 +128,7 @@ class Port(Module):
         "tcp"
         >>> # Could also be tcp4/tcp6 depending on your system
         >>> Port("0.0.0.0", 22).protocol
-        tcp4
+        "tcp4"
 
         It is recommended to use :py:attr:`.is_tcp` or :py:attr:`.is_udp`
 
@@ -183,7 +185,7 @@ class BSDPort(Port):
         # -a (show the state of all sockets)
         # -n (show network addresses as numbers)
         # -f inet (show connections for the 'inet' address family)
-        return "netstat -an -f inet"
+        return "netstat -a -n -f inet"
 
     def _parse_address_port(self, local_address):
         # Examples: `127.0.0.1.22`, `*.22`
