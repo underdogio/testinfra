@@ -102,7 +102,7 @@ class File(Module):
         """Return file mode as octal integer
 
         >>> File("/etc/passwd").mode
-        384
+        384  # 0600 (octal)
         >>> File("/etc/password").mode == 0600
         True
         >>> oct(File("/etc/password").mode) == '0600'
