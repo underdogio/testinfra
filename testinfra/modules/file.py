@@ -102,11 +102,13 @@ class File(Module):
         """Return file mode as octal integer
 
         >>> File("/etc/passwd").mode
-        384  # 0600 (octal)
-        >>> File("/etc/password").mode == 0600
+        384  # 0o600 (octal)
+        >>> File("/etc/password").mode == 0o600
         True
         >>> oct(File("/etc/password").mode) == '0600'
         True
+
+        Note: Python 3 oct(x)_ function will produce ``'0o600'``
 
         You can also utilize the file mode constants from
         the stat_ library for testing file mode.
@@ -115,6 +117,7 @@ class File(Module):
         >>> File("/etc/password").mode == stat.S_IRUSR | stat.S_IWUSR
         True
 
+        .. _oct(x): https://docs.python.org/3.5/library/functions.html#oct
         .. _stat: https://docs.python.org/2/library/stat.html
         """
         raise NotImplementedError
