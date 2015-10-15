@@ -99,10 +99,23 @@ class File(Module):
 
     @property
     def mode(self):
-        """Return file mode as integer
+        """Return file mode as octal integer
 
         >>> File("/etc/passwd").mode
-        644
+        384
+        >>> File("/etc/password").mode == 0600
+        True
+        >>> oct(File("/etc/password").mode) == '0600'
+        True
+
+        You can also utilize the file mode constants from
+        the stat_ library for testing file mode.
+
+        >>> import stat
+        >>> File("/etc/password").mode == stat.S_IRUSR | stat.S_IWUSR
+        True
+
+        .. _stat: https://docs.python.org/2/library/stat.html
         """
         raise NotImplementedError
 
@@ -193,7 +206,9 @@ class GNUFile(File):
 
     @property
     def mode(self):
-        return int(self.check_output("stat -c %%a %s", self.path))
+        # Supply a base of 8 to convert from octal to integer
+        # e.g. int('644', 8) -> 420
+        return int(self.check_output("stat -c %%a %s", self.path), 8)
 
     @property
     def mtime(self):
@@ -233,7 +248,9 @@ class BSDFile(File):
 
     @property
     def mode(self):
-        return int(self.check_output("stat -f %%Lp %s", self.path))
+        # Supply a base of 8 to convert from octal to integer
+        # e.g. int('644', 8) -> 420
+        return int(self.check_output("stat -f %%Lp %s", self.path), 8)
 
     @property
     def mtime(self):
