@@ -206,7 +206,7 @@ class GNUFile(File):
 
     @property
     def mode(self):
-        # Supply a base of 8 to convert from octal to integer
+        # Supply a base of 8 when parsing an octal integer
         # e.g. int('644', 8) -> 420
         return int(self.check_output("stat -c %%a %s", self.path), 8)
 
@@ -248,7 +248,7 @@ class BSDFile(File):
 
     @property
     def mode(self):
-        # Supply a base of 8 to convert from octal to integer
+        # Supply a base of 8 when parsing an octal integer
         # e.g. int('644', 8) -> 420
         return int(self.check_output("stat -f %%Lp %s", self.path), 8)
 
